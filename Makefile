@@ -3,7 +3,7 @@ ORG_PATH=github.com/mad01
 REPO_PATH=$(ORG_PATH)/$(PROJ)
 
 VERSION ?= $(shell ./scripts/git-version)
-LD_FLAGS="-X common.Version=$(VERSION) -extldflags \"-static\" "
+LD_FLAGS="-X main.Version=$(VERSION) -extldflags \"-static\" "
 version.Version=$(VERSION)
 $( shell mkdir -p _bin )
 $( shell mkdir -p _release )
@@ -23,19 +23,19 @@ test:
 build: bin/pingpong/dev
 
 bin/pingpong/dev:
-	@go install -v -ldflags $(LD_FLAGS) ./cmd/dpl-ctl
+	@go install -v -ldflags $(LD_FLAGS) 
 
 
 build-release: bin/pingpong/release
 
 bin/pingpong/release:
-	@go build -v -o _release/dpl-ctl -ldflags $(LD_FLAGS) ./cmd/dpl-ctl
+	@go build -v -o _release/$(PROJ) -ldflags $(LD_FLAGS) 
 
 
 docker-build: docker/build/pingpong
 
 docker/build/pingpong:
-	@docker build -t quay.io/mad01/dpl-operator:$(VERSION) --file Dockerfile .
+	@docker build -t quay.io/mad01/$(PROJ):$(VERSION) --file Dockerfile .
 
 docker-push:
 	@docker push quay.io/mad01/$(PROJ):$(VERSION)

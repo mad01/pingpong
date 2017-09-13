@@ -3,8 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-
-	"github.com/mad01/pingpong/common"
 )
 
 type config struct {
@@ -19,7 +17,7 @@ func newCmd() *config {
 	flag.Parse()
 
 	if c.Version {
-		fmt.Printf("Version: %v", common.Version)
+		fmt.Printf("Version: %v", Version)
 	}
 
 	return c
