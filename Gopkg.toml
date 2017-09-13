@@ -32,3 +32,14 @@
 [[constraint]]
   name = "google.golang.org/grpc"
   version = "1.6.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/openzipkin/zipkin-go-opentracing"
+
+[[constraint]]
+  name = "github.com/apache/thrift"
+  branch = "master"
+  packages = ["lib/go/thrift"]
+
+
