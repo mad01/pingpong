@@ -40,6 +40,5 @@
 [[constraint]]
   name = "github.com/apache/thrift"
   branch = "master"
-  packages = ["lib/go/thrift"]
 
 
