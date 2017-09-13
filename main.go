@@ -9,8 +9,14 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware"
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	"github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
@@ -62,11 +68,23 @@ func serveGRPC(addr string, errChan chan error) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
+	zapOpts := []grpc_zap.Option{
+		grpc_zap.WithDurationField(func(duration time.Duration) zapcore.Field {
+			return zap.Int64("grpc.time_ns", duration.Nanoseconds())
+		}),
+	}
+	zapLogger, _ := zap.NewProduction()
+	defer zapLogger.Sync() // flushes buffer, if any
+
 	middlewareServer := grpc.NewServer(
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
+			grpc_ctxtags.StreamServerInterceptor(),
+			grpc_zap.StreamServerInterceptor(zapLogger, zapOpts...),
 			grpc_prometheus.StreamServerInterceptor,
 		)),
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+			grpc_ctxtags.UnaryServerInterceptor(),
+			grpc_zap.UnaryServerInterceptor(zapLogger, zapOpts...),
 			grpc_prometheus.UnaryServerInterceptor,
 		)),
 	)
