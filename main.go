@@ -11,6 +11,9 @@ import (
 	"syscall"
 	"time"
 
+	"sourcegraph.com/sourcegraph/appdash"
+	appdashtracer "sourcegraph.com/sourcegraph/appdash/opentracing"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
@@ -18,6 +21,7 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	"github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"github.com/grpc-ecosystem/go-grpc-prometheus"
+	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	pb "github.com/mad01/pingpong/com"
@@ -29,6 +33,11 @@ import (
 //
 // Server
 //
+var (
+	zipkinHTTPEndpoint  = "0.0.0.0:9411"
+	appDashHTTPEndpoint = "0.0.0.0:8700"
+)
+
 type config struct {
 	server   bool
 	clinet   bool
@@ -68,6 +77,28 @@ func serveGRPC(addr string, errChan chan error) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
+	//
+	// zipkin/appdash
+
+	collector := appdash.NewRemoteCollector("localhost:8700")
+	tracer := appdashtracer.NewTracer(collector)
+
+	// collector, err := zipkin.NewHTTPCollector(zipkinHTTPEndpoint)
+	// if err != nil {
+	// 	errChan <- err
+	// }
+	// tracer, err := zipkin.NewTracer(
+	// 	zipkin.NewRecorder(collector, false, "0.0.0.0:0", "pingpong"),
+	// )
+	// if err != nil {
+	// 	errChan <- err
+	// }
+
+	//
+	//
+
+	//
+	// zap
 	zapOpts := []grpc_zap.Option{
 		grpc_zap.WithDurationField(func(duration time.Duration) zapcore.Field {
 			return zap.Int64("grpc.time_ns", duration.Nanoseconds())
@@ -75,6 +106,8 @@ func serveGRPC(addr string, errChan chan error) {
 	}
 	zapLogger, _ := zap.NewProduction()
 	defer zapLogger.Sync() // flushes buffer, if any
+	//
+	//
 
 	middlewareServer := grpc.NewServer(
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
@@ -84,6 +117,7 @@ func serveGRPC(addr string, errChan chan error) {
 		)),
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_ctxtags.UnaryServerInterceptor(),
+			otgrpc.OpenTracingServerInterceptor(tracer),
 			grpc_zap.UnaryServerInterceptor(zapLogger, zapOpts...),
 			grpc_prometheus.UnaryServerInterceptor,
 		)),
