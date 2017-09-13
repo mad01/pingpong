@@ -24,6 +24,9 @@ import (
 // Server
 //
 type config struct {
+	server   bool
+	clinet   bool
+	msg      string
 	grpcAddr string
 	httpAddr string
 	Version  bool
@@ -34,6 +37,9 @@ func newServerCmd() *config {
 	flag.StringVar(&c.grpcAddr, "grpc.addr", "0.0.0.0:8881", "grpc server port")
 	flag.StringVar(&c.httpAddr, "http.addr", "0.0.0.0:8882", "http server port")
 	flag.BoolVar(&c.Version, "version", false, "show version")
+	flag.BoolVar(&c.server, "server", false, "run as server")
+	flag.BoolVar(&c.clinet, "client", false, "run as client")
+	flag.StringVar(&c.msg, "msg", "foobar", "message to send in ping")
 	flag.Parse()
 
 	if c.Version {
@@ -57,8 +63,12 @@ func serveGRPC(addr string, errChan chan error) {
 	}
 
 	middlewareServer := grpc.NewServer(
-		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(grpc_prometheus.StreamServerInterceptor)),
-		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(grpc_prometheus.UnaryServerInterceptor)),
+		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
+			grpc_prometheus.StreamServerInterceptor,
+		)),
+		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+			grpc_prometheus.UnaryServerInterceptor,
+		)),
 	)
 
 	pb.RegisterPingerServer(middlewareServer, &server{})
@@ -112,12 +122,43 @@ func serveAll(c *config) {
 // Client
 //
 
+func clientGRPCconn(addr string) (*grpc.ClientConn, error) {
+	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to server: %v", err.Error())
+	}
+	return conn, nil
+}
+
+func clientPing(cc *grpc.ClientConn, msg string) {
+	client := pb.NewPingerClient(cc)
+
+	request := pb.PingRequest{Msg: msg}
+	resp, err := client.Ping(context.Background(), &request)
+	if err != nil {
+		fmt.Printf("ping err: %v", err.Error())
+		os.Exit(1)
+	}
+	fmt.Printf("Pong: %v", resp.Msg)
+}
+
 //
 // End Client
 //
 
 func main() {
-	serverConf := newServerCmd()
-	serveAll(serverConf)
+	conf := newServerCmd()
+	if conf.server {
+		serveAll(conf)
+	}
+
+	if conf.clinet {
+		cc, err := clientGRPCconn(conf.grpcAddr)
+		if err != nil {
+			fmt.Printf("Fail connect to server: %v", err.Error())
+			os.Exit(1)
+		}
+		clientPing(cc, conf.msg)
+	}
 
 }
