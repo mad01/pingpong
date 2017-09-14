@@ -2,6 +2,10 @@ syntax = "proto3";
 
 package com;
 
+
+//
+// Pinger
+//
 service Pinger {
     rpc Ping(PingRequest) returns (PongResponse) {}
 }
@@ -14,3 +18,27 @@ message PingRequest {
 message PongResponse {
     string msg = 1;
 }
+
+//
+//
+//
+
+
+//
+// RandomMsg
+//
+
+service RandomMsg {
+    rpc GetRandomMsg(RandomMsgRequest) returns (RandomMsgResponse) {}
+}
+
+message RandomMsgRequest {
+}
+
+message RandomMsgResponse {
+    string msg = 1;
+}
+
+//
+//
+//
