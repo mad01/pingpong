@@ -12,6 +12,9 @@ import (
 func getTracer(name string) (*opentracing.Tracer, io.Closer, error) {
 	defaultSamplingServerURL := "http://localhost:5778/sampling"
 
+	// Change config to dofferent sampler rate lile default
+	// in a production setting since not all requests need tracing
+	// only a N % is needed to take decisions about performense
 	cfg := jaegercfg.Configuration{
 		Sampler: &jaegercfg.SamplerConfig{
 			SamplingServerURL: defaultSamplingServerURL,

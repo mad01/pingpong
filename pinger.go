@@ -44,7 +44,7 @@ func (p *pingServer) MsgConn(addr string) error {
 
 func (p *pingServer) Ping(ctx context.Context, in *pb.PingRequest) (*pb.PongResponse, error) {
 	client := pb.NewRandomMsgClient(p.cc)
-	msgResp, err := client.GetRandomMsg(ctx, &pb.RandomMsgRequest{})
+	msgResp, err := client.GetRandomMsg(ctx, &pb.RandomMsgRequest{}) // use incomming context to take span for tracing
 	if err != nil {
 		return nil, fmt.Errorf("Fail to get msg from downstream: %v", err.Error())
 	}
