@@ -35,7 +35,7 @@ import (
 //
 var (
 	zipkinHTTPEndpoint  = "0.0.0.0:9411"
-	appDashHTTPEndpoint = "0.0.0.0:8700"
+	appDashHTTPEndpoint = "0.0.0.0:7701"
 )
 
 type config struct {
@@ -80,7 +80,7 @@ func serveGRPC(addr string, errChan chan error) {
 	//
 	// zipkin/appdash
 
-	collector := appdash.NewRemoteCollector("localhost:8700")
+	collector := appdash.NewRemoteCollector(appDashHTTPEndpoint)
 	tracer := appdashtracer.NewTracer(collector)
 
 	// collector, err := zipkin.NewHTTPCollector(zipkinHTTPEndpoint)
