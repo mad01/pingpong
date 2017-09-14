@@ -11,9 +11,6 @@ import (
 	"syscall"
 	"time"
 
-	"sourcegraph.com/sourcegraph/appdash"
-	appdashtracer "sourcegraph.com/sourcegraph/appdash/opentracing"
-
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
@@ -45,10 +42,12 @@ func serveRandomMsgGRPC(addr string, errChan chan error) {
 	}
 
 	//
-	// appdash
+	// opentracing
 
-	collector := appdash.NewRemoteCollector(appDashHTTPEndpoint)
-	tracer := appdashtracer.NewTracer(collector)
+	tracer, closer, err := getTracer("randommsg")
+	if err != nil {
+		errChan <- err
+	}
 
 	//
 	//
@@ -73,7 +72,7 @@ func serveRandomMsgGRPC(addr string, errChan chan error) {
 		)),
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_ctxtags.UnaryServerInterceptor(),
-			otgrpc.OpenTracingServerInterceptor(tracer),
+			otgrpc.OpenTracingServerInterceptor(*tracer),
 			grpc_zap.UnaryServerInterceptor(zapLogger, zapOpts...),
 			grpc_prometheus.UnaryServerInterceptor,
 		)),
@@ -88,6 +87,7 @@ func serveRandomMsgGRPC(addr string, errChan chan error) {
 	reflection.Register(middlewareServer)
 
 	go func() {
+		defer closer.Close()
 		errChan <- middlewareServer.Serve(lis)
 	}()
 

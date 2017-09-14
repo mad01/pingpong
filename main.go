@@ -3,14 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
 	pb "github.com/mad01/pingpong/com"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"sourcegraph.com/sourcegraph/appdash"
-	appdashtracer "sourcegraph.com/sourcegraph/appdash/opentracing"
 )
 
 //
@@ -18,7 +17,7 @@ import (
 //
 var (
 	zipkinHTTPEndpoint  = "0.0.0.0:9411"
-	appDashHTTPEndpoint = "0.0.0.0:7701"
+	appDashHTTPEndpoint = "0.0.0.0:5775"
 )
 
 type config struct {
@@ -59,19 +58,20 @@ func newServerCmd() *config {
 // Client
 //
 
-func clientGRPCconn(addr string) (*grpc.ClientConn, error) {
-	collector := appdash.NewRemoteCollector(appDashHTTPEndpoint)
-	tracer := appdashtracer.NewTracer(collector)
-
+func clientGRPCconn(addr, name string) (*grpc.ClientConn, io.Closer, error) {
+	tracer, closer, err := getTracer(name)
+	if err != nil {
+		return nil, nil, err
+	}
 	conn, err := grpc.Dial(
 		addr,
 		grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(otgrpc.OpenTracingClientInterceptor(tracer)),
+		grpc.WithUnaryInterceptor(otgrpc.OpenTracingClientInterceptor(*tracer)),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to server: %v", err.Error())
+		return nil, nil, fmt.Errorf("failed to connect to server: %v", err.Error())
 	}
-	return conn, nil
+	return conn, closer, nil
 }
 
 func clientPing(cc *grpc.ClientConn, msg string) {
@@ -98,7 +98,9 @@ func main() {
 	}
 
 	if conf.clinet {
-		cc, err := clientGRPCconn(conf.grpcPingerAddr)
+		cc, closer, err := clientGRPCconn(conf.grpcPingerAddr, "cli")
+		defer cc.Close()
+		defer closer.Close()
 		if err != nil {
 			fmt.Printf("Fail connect to server: %v", err.Error())
 			os.Exit(1)
