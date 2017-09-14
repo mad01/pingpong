@@ -2,10 +2,22 @@
 
 
 [[projects]]
+  name = "github.com/apache/thrift"
+  packages = ["lib/go/thrift"]
+  revision = "b2a4d4ae21c789b689dd162deb819665567f481c"
+  version = "0.10.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/beorn7/perks"
   packages = ["quantile"]
   revision = "4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/codahale/hdrhistogram"
+  packages = ["."]
+  revision = "3a0bb77429bd3a61596f5e8a3172445844342120"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
@@ -50,10 +62,10 @@
   version = "v1.0.0"
 
 [[projects]]
+  branch = "master"
   name = "github.com/opentracing/opentracing-go"
   packages = [".","ext","log"]
-  revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
-  version = "v1.0.2"
+  revision = "8ebe5d4e236eed9fd88e593c288bfb804d630b8c"
 
 [[projects]]
   name = "github.com/prometheus/client_golang"
@@ -78,6 +90,18 @@
   name = "github.com/prometheus/procfs"
   packages = [".","xfs"]
   revision = "e645f4e5aaa8506fc71d6edbc5c4ff02c04c46f2"
+
+[[projects]]
+  name = "github.com/uber/jaeger-client-go"
+  packages = [".","config","internal/spanlog","log","rpcmetrics","thrift-gen/agent","thrift-gen/jaeger","thrift-gen/sampling","thrift-gen/zipkincore","utils"]
+  revision = "3e3870040def0ebdaf65a003863fa64f5cb26139"
+  version = "v2.9.0"
+
+[[projects]]
+  name = "github.com/uber/jaeger-lib"
+  packages = ["metrics"]
+  revision = "3b2a9ad2a045881ab7a0f81d465be54c8292ee4f"
+  version = "v1.1.0"
 
 [[projects]]
   name = "go.uber.org/atomic"
@@ -130,6 +154,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6b59e6c488e18dfb013476add63dac5d43f83ba0a3718d660dc7ab16f8e0d4d1"
+  inputs-digest = "ba562efa3f04898b319ac064d46dafebea96cfc7b41568cb937d856bc9314650"
   solver-name = "gps-cdcl"
   solver-version = 1

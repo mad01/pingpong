@@ -35,10 +35,8 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/openzipkin/zipkin-go-opentracing"
+  name = "github.com/opentracing/opentracing-go"
 
 [[constraint]]
   name = "github.com/apache/thrift"
   branch = "master"
-
-
