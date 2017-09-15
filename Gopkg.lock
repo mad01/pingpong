@@ -20,12 +20,6 @@
   revision = "3a0bb77429bd3a61596f5e8a3172445844342120"
 
 [[projects]]
-  name = "github.com/gogo/protobuf"
-  packages = ["io","proto"]
-  revision = "100ba4e885062801d56799d78530b73b178a78f3"
-  version = "v0.4"
-
-[[projects]]
   branch = "master"
   name = "github.com/golang/protobuf"
   packages = ["jsonpb","proto","protoc-gen-go/descriptor","ptypes","ptypes/any","ptypes/duration","ptypes/struct","ptypes/timestamp"]
@@ -53,12 +47,6 @@
   name = "github.com/matttproud/golang_protobuf_extensions"
   packages = ["pbutil"]
   revision = "3247c84500bff8d9fb6d579d800f20b3e091582c"
-  version = "v1.0.0"
-
-[[projects]]
-  name = "github.com/opentracing/basictracer-go"
-  packages = [".","wire"]
-  revision = "1b32af207119a14b1b231d451df3ed04a72efebf"
   version = "v1.0.0"
 
 [[projects]]
@@ -145,15 +133,9 @@
   revision = "f92cdcd7dcdc69e81b2d7b338479a19a8723cfa3"
   version = "v1.6.0"
 
-[[projects]]
-  branch = "master"
-  name = "sourcegraph.com/sourcegraph/appdash"
-  packages = [".","internal/wire","opentracing"]
-  revision = "5b9b70908c0e32b53e17215ee6e9515b02ad08b2"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ba562efa3f04898b319ac064d46dafebea96cfc7b41568cb937d856bc9314650"
+  inputs-digest = "d8eccf69ff347514b947b34ce694a4b5cd5237a0dbe8d8d46d400d6f0c0e6375"
   solver-name = "gps-cdcl"
   solver-version = 1
